@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="admin_panel_styles.css">
+</head>
+<body>
+<h1>Панель администратора</h1>
+
+<h2>Добавить товары</h2>
+<form id="addForm">
+    <div id="productFields">
+        <div class="form-group product">
+            <label>Название:</label>
+            <input type="text" class="name" required>
+            <label>Цена:</label>
+            <input type="number" class="price" required>
+            <label>Описание:</label>
+            <textarea class="description" required></textarea>
+            <label>Категории (через запятую):</label>
+            <input type="text" class="categories" required>
+        </div>
+    </div>
+    <button type="submit">Добавить товары</button>
+    <button type="button" id="addProductButton">Добавить поле</button>
+</form>
+
+<h2>Редактировать товар</h2>
+<form id="editForm">
+    <div class="form-group">
+        <label for="editId">ID товара:</label>
+        <input type="number" id="editId" required>
+    </div>
+    <div class="form-group">
+        <label for="editName">Название:</label>
+        <input type="text" id="editName">
+    </div>
+    <div class="form-group">
+        <label for="editPrice">Цена:</label>
+        <input type="number" id="editPrice">
+    </div>
+    <div class="form-group">
+        <label for="editDescription">Описание:</label>
+        <textarea id="editDescription"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="editCategories">Категории (через запятую):</label>
+        <input type="text" id="editCategories">
+    </div>
+    <button type="submit">Редактировать</button>
+</form>
+
+<h2>Удалить товар</h2>
+<form id="deleteForm">
+    <div class="form-group">
+        <label for="deleteId">ID товара:</label>
+        <input type="number" id="deleteId" required>
+    </div>
+    <button type="submit">Удалить</button>
+</form>
+
+<!-- Боковая панель с чатом -->
+<div id="chatPanel" class="chat-panel">
+    <button id="toggleChat" onclick="toggleChat()">Чат</button>
+    <div id="chatContent" class="chat-content">
+        <div id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="Введите сообщение..." onkeydown="handleKeyDown(event)">
+            <button onclick="sendMessage()" class="send-button">></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Логика для чата
+    const ws = new WebSocket('ws://localhost:8081');
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const chatMessages = document.getElementById('chatMessages');
+
+        if (data.type === 'history') {
+            // Отображаем историю сообщений
+            data.messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', message.sender);
+                messageElement.innerHTML = `
+                    <span class="sender">${message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                    <span class="text">${message.text}</span>
+                `;
+                chatMessages.appendChild(messageElement);
+            });
+        } else if (data.type === 'message') {
+            // Отображаем новое сообщение
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', data.message.sender);
+            messageElement.innerHTML = `
+                <span class="sender">${data.message.sender === 'client' ? 'Клиент' : 'Администратор'}:</span>
+                <span class="text">${data.message.text}</span>
+            `;
+            chatMessages.appendChild(messageElement);
+        }
+
+        // Автопрокрутка вниз
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Отправка сообщения
+    function sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message) {
+            ws.send(JSON.stringify({text: message, sender: 'admin'}));
+            chatInput.value = '';
+        }
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    // Логика для скрытия/показа боковой панели
+    function toggleChat() {
+        const chatPanel = document.getElementById('chatPanel');
+        const chatContent = document.getElementById('chatContent');
+        if (chatPanel.classList.contains('open')) {
+            chatPanel.classList.remove('open');
+            chatContent.style.display = 'none';
+        } else {
+            chatPanel.classList.add('open');
+            chatContent.style.display = 'block';
+        }
+    }
+
+    // Логика для добавления товаров
+    document.getElementById('addForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const products = [];
+
+        const productElements = document.querySelectorAll('.product');
+        productElements.forEach(productElement => {
+            const product = {
+                name: productElement.querySelector('.name').value,
+                price: parseFloat(productElement.querySelector('.price').value),
+                description: productElement.querySelector('.description').value,
+                categories: productElement.querySelector('.categories').value.split(',').map(cat => cat.trim())
+            };
+            products.push(product);
+        });
+
+        const response = await fetch('http://localhost:8080/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(products)
+        });
+
+        if (response.ok) {
+            alert('Товары добавлены');
+            location.reload();
+        } else {
+            alert('Ошибка при добавлении товаров');
+        }
+
+        document.getElementById('addForm').reset();
+        const productFields = document.getElementById('productFields');
+        productFields.innerHTML = '';
+        productCount = 1;
+    });
+
+    document.getElementById('addProductButton').addEventListener('click', () => {
+        const productFields = document.getElementById('productFields');
+        const newProduct = document.createElement('div');
+        newProduct.classList.add('form-group', 'product');
+        newProduct.innerHTML = `
+            <label>Название:</label>
+            <input type="text" class="name" required>
+            <label>Цена:</label>
+            <input type="number" class="price" required>
+            <label>Описание:</label>
+            <textarea class="description" required></textarea>
+            <label>Категории (через запятую):</label>
+            <input type="text" class="categories" required>
+        `;
+        productFields.appendChild(newProduct);
+    });
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const product = {
+            id: parseInt(document.getElementById('editId').value)
+        };
+
+        const name = document.getElementById('editName').value;
+        if (name) {
+            product.name = name;
+        }
+
+        const price = parseFloat(document.getElementById('editPrice').value);
+        if (!isNaN(price)) {
+            product.price = price;
+        }
+
+        const description = document.getElementById('editDescription').value;
+        if (description) {
+            product.description = description;
+        }
+
+        const categories = document.getElementById('editCategories').value.split(',').map(cat => cat.trim());
+        if (categories.length > 0 && categories[0] !== "") {
+            product.categories = categories;
+        }
+
+        const response = await fetch('http://localhost:8080/edit', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(product)
+        });
+
+        if (response.ok) {
+            alert('Товар обновлен');
+            location.reload();
+        } else {
+            alert('Ошибка при обновлении товара');
+        }
+
+        document.getElementById('editForm').reset();
+    });
+
+    document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('deleteId').value);
+
+        const response = await fetch(`http://localhost:8080/delete?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Товар удален');
+            location.reload();
+        } else {
+            alert('Ошибка при удалении товара');
+        }
+
+        document.getElementById('deleteForm').reset();
+    });
+</script>
+</body>
+</html>

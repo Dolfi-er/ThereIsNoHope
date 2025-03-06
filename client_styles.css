@@ -1,0 +1,175 @@
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif; /* Changed font for a modern look */
+    margin: 20px;
+    position: relative;
+    background-color: #f9f9f9; /* Light background for better contrast */
+}
+
+.category {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Increased min width for better card size */
+    gap: 12px; /* Increased gap for better spacing */
+}
+
+.card {
+    border: 1px solid #ccc;
+    padding: 20px; /* Increased padding for comfort */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Enhanced shadow for depth */
+    box-sizing: border-box; /* Include padding and border in width */
+    width: 100%; /* Cards occupy full width */
+    border-radius: 8px; /* Rounded corners for cards */
+    background-color: #ffffff; /* White background for cards */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effects */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+h1 {
+    text-align: center;
+    color: #333; /* Darker color for headings */
+}
+
+button {
+    padding: 12px 24px; /* Increased padding for buttons */
+    background-color: #754de2; /* Consistent button color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners for buttons */
+    font-size: 16px;
+    margin-top: 10px; /* Increased margin for better spacing */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+button:hover {
+    background-color: #4f21a0; /* Darker shade on hover */
+}
+
+/* Chat panel styles */
+.chat-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px; /* Slightly wider for better usability */
+    height: 100%;
+    background-color: #ffffff; /* White background for chat panel */
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2); /* Stronger shadow for depth */
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+}
+
+.chat-panel.open {
+    transform: translateX(0);
+}
+
+#toggleChat {
+    position: absolute;
+    left: -60px; /* Adjusted position for better visibility */
+    top: 20px;
+    background-color: #754de2; /* Consistent color with buttons */
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px 0 0 5px; /* Rounded corners */
+    font-size: 14px;
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+#toggleChat:hover {
+    background-color: #4f21a0;
+}
+
+.chat-content {
+    padding: 20px;
+    display: none;
+}
+
+#chatMessages {
+    height: calc(100vh - 150px); /* Adjusted height for better layout */
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    border-radius: 5px; /* Rounded corners for message area */
+    background-color: #f1f1f1; /* Light background for messages */
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 10px; /* Increased gap for better spacing */
+}
+
+#chatInput {
+    width: calc(100% - 100px); /* Adjusted width for better layout */
+    padding: 12px; /* Increased padding for comfort */
+    border: 1px solid #ccc;
+    border-radius: 5px; /* Rounded corners for input */
+    font-size: 14px;
+    transition: border-color 0.3s; /* Smooth transition for focus effect */
+}
+
+#chatInput:focus {
+    border-color: #754de2; /* Highlight border on focus */
+}
+
+.send-button {
+    padding: 12px 20px; /* Increased padding for buttons */
+    background-color: #754de2; /* Consistent color with buttons */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners for buttons */
+    font-size: 16px;
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.send-button:hover {
+    background-color: #4f21a0;
+}
+
+/* Styles for chat messages */
+#chatMessages div {
+    padding: 10px; /* Increased padding for messages */
+    margin-bottom: 10px;
+    background-color: #ffffff; /* White background for messages */
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Rounded corners for messages */
+    font-size: 14px;
+}
+
+#chatMessages .client {
+    background-color: #d2e1ff; /* Light blue for client messages */
+}
+
+#chatMessages .admin {
+    background-color: #bdc6d1; /* Light gray for admin messages */
+}
+
+.sender {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #333; /* Darker color for sender names */
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    .category {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusted for smaller screens */
+    }
+
+    .card {
+        width: 100%; /* Cards occupy full width on mobile */
+        margin: 8px 0; /* Reduced margins for mobile */
+    }
+
+    .controls {
+        gap: 4px; /* Reduced gap between buttons on small screens */
+    }
+
+    #toggleChat {
+        top: 10px; /* Reduced top margin for mobile */
+    }
+}
